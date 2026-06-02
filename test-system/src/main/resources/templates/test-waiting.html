@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Очікування початку тесту</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #e8f5e9; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .wait-box { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .spinner-border { width: 3rem; height: 3rem; color: #8fae87; }
+    </style>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+</head>
+<body>
+
+<div class="wait-box">
+    <h2 class="mb-3" style="color: #55704f;">👋 Ви в лобі!</h2>
+    <p class="text-muted fs-5">Очікуйте, поки вчитель розпочне тест...</p>
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const testId = /*[[${testId}]]*/ 0;
+
+    setInterval(async () => {
+        try {
+            const response = await fetch(`/api/tests/${testId}/status`);
+            const status = await response.text();
+            
+            if (status === "IN_PROGRESS") {
+                window.location.href = `/test/pass/${testId}`;
+            } else if (status === "CLOSED") {
+                window.location.href = "/?joinError=closed";
+            }
+        } catch (e) {
+            console.error("Помилка перевірки статусу", e);
+        }
+    }, 2000);
+</script>
+
+</body>
+</html>

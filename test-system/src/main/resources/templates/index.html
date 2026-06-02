@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Знань Простір - Платформа тестування</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"> <!-- AOS Стилі -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> <!-- Іконки -->
+    <style>
+        body { background: #f4f7f6; min-height: 100vh; display: flex; flex-direction: column; margin: 0; }
+        
+       
+        .hero-section {
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 50%, #52b788 100%);
+            color: white; padding: 80px 0; position: relative; overflow: hidden;
+        }
+        .hero-section::after {
+            content: ''; position: absolute; top: -50px; right: -50px; width: 200px; height: 200px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        .hero-section::before {
+            content: ''; position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+
+       
+        .test-card { background: white; border-radius: 15px; border: none; transition: transform 0.3s, box-shadow 0.3s; }
+        .test-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(45, 106, 79, 0.15); }
+
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
+        .empty-state i { font-size: 4rem; color: #8fae87; margin-bottom: 20px; }
+
+        
+        .site-footer { background-color: #262626; color: #a8a8a8; padding: 60px 0 30px; margin-top: auto; font-size: 0.9rem; }
+        .site-footer h6 { color: white; font-weight: bold; margin-bottom: 20px; }
+        .site-footer a { color: #8fae87; text-decoration: none; transition: color 0.3s; }
+        .site-footer a:hover { color: #52b788; }
+        .footer-social a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #333; border-radius: 50%; color: white; margin-right: 10px; transition: background 0.3s; }
+        .footer-social a:hover { background: #52b788; }
+        .footer-bottom { border-top: 1px solid #333; padding-top: 20px; margin-top: 40px; text-align: center; }
+
+       
+        .scroll-btn { position: fixed; right: 30px; width: 45px; height: 45px; border-radius: 50%; background: #8fae87; color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem; display: none; align-items: center; justify-content: center; z-index: 1000; transition: background 0.3s; }
+        .scroll-btn:hover { background: #2d6a4f; }
+        #scrollUp { bottom: 90px; }
+        #scrollDown { bottom: 30px; }
+    </style>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<section class="hero-section text-center">
+    <div class="container position-relative" data-aos="fade-up">
+        <h1 class="display-4 fw-bold mb-3">Тестування стало простішим</h1>
+        <p class="lead mb-4" style="max-width: 600px; margin: 0 auto;">Створюй тести, проводи їх у реальному часі та аналізуй результати разом із «Знань Простір»</p>
+        
+        <div class="d-flex justify-content-center gap-3 mb-5">
+            <a href="/add-question" class="btn btn-light btn-lg text-success fw-bold shadow-sm">✍ Створити тест</a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <form action="/join-test" method="post" class="p-3 rounded-4 shadow-lg" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(5px);">
+                    <div class="input-group">
+                        <input type="text" name="testCode" class="form-control form-control-lg" placeholder="Введіть код для приєднання..." required>
+                        <button class="btn btn-warning btn-lg fw-bold" type="submit">УВІЙТИ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div class="container mt-5 mb-5">
+    <h3 class="fw-bold mb-4" data-aos="fade-right">📚 Доступні тести</h3>
+    
+   
+    <div th:if="${allTests.isEmpty()}" class="empty-state glass-panel p-5" data-aos="fade-up">
+        <i class="fas fa-folder-open"></i>
+        <h4>Тестів ще немає</h4>
+        <p>Станьте першим, хто створить тест для своєї аудиторії!</p>
+        <a href="/add-question" class="btn btn-success btn-lg mt-3">Створити перший тест</a>
+    </div>
+
+    <div th:each="test, iterStat : ${allTests}" class="card test-card mb-4 p-4 shadow-sm" th:data-aos="${iterStat.index % 2 == 0 ? 'fade-right' : 'fade-left'}" data-aos-delay="100">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold text-dark" th:text="${test.title}">Назва тесту</h5>
+                <p class="text-muted small mb-1">
+                    <i class="fas fa-book-open text-success"></i> Предмет: <span class="fw-bold" th:text="${test.category}">Предмет</span> | 
+                    <i class="fas fa-users text-success"></i> Аудиторія: <span class="fw-bold" th:text="${test.targetAudience}">Клас</span>
+                </p>
+                <p class="text-muted small mb-0">
+                    <i class="fas fa-key text-success"></i> Код: <span class="badge bg-success test-code-badge" th:text="${test.testCode}">CODE</span>
+                </p>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <a th:href="@{/test/practice/{id}(id=${test.id})}" class="btn btn-outline-success">Запустити</a>
+                <a th:if="${user != null and user.role == 'TEACHER'}" th:href="@{/test/preview/{id}(id=${test.id})}" class="btn btn-warning text-white">👁 Провести</a>
+                <a th:if="${user != null and user.email == test.authorEmail}" th:href="@{/test/teacher-results/{id}(id=${test.id})}" class="btn btn-info text-white">📊 Результати</a>
+                <form th:if="${user != null and user.email == test.authorEmail}" th:action="@{/test/delete/{id}(id=${test.id})}" method="post">
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="row">
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up">
+                <h6><i class="fas fa-leaf text-success me-2"></i>Знань Простір</h6>
+                <p class="text-justify">Сучасна платформа для створення тестів, перевірки знань та проведення інтерактивних опитувань у реальному часі.</p>
+            </div>
+            
+           
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <h6><i class="fas fa-address-book text-success me-2"></i>Контакти</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-phone me-2 text-success"></i> +380 (99) 123-45-67</li>
+                    <li class="mb-2"><i class="fas fa-envelope me-2 text-success"></i> support@znanyaprostir.ua</li>
+                    <li><i class="fas fa-map-marker-alt me-2 text-success"></i> м. Київ, вул. Академічна, 1</li>
+                </ul>
+            </div>
+            
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <h6><i class="fas fa-share-alt text-success me-2"></i>Ми в мережі</h6>
+                <div class="footer-social">
+                    <a href="#" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" title="Viber"><i class="fab fa-viber"></i></i></a>
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            &copy; 2026 Знань Простір. Всі права захищені.
+        </div>
+    </div>
+</footer>
+
+
+<button id="scrollUp" class="scroll-btn" title="Вгору"><i class="fas fa-chevron-up"></i></button>
+<button id="scrollDown" class="scroll-btn" title="Вниз"><i class="fas fa-chevron-down"></i></button>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 800, once: true }); 
+
+    
+    const scrollUpBtn = document.getElementById('scrollUp');
+    const scrollDownBtn = document.getElementById('scrollDown');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollUpBtn.style.display = 'flex';
+        } else {
+            scrollUpBtn.style.display = 'none';
+        }
+    });
+
+    scrollUpBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    scrollDownBtn.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
+</script>
+</body>
+</html>

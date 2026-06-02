@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Реєстрація у системі</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(180deg, #d3e0d7 0%, #e2ebd5 60%, #a3c29b 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #4a574a;
+        }
+        .auth-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 20px; 
+            box-shadow: 0 12px 40px rgba(74, 87, 74, 0.15); 
+            width: 100%; 
+            max-width: 480px; 
+            padding: 40px 35px; 
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .brand-title { 
+            color: #5a755a; 
+            font-weight: 700; 
+            font-size: 1.8rem; 
+            text-align: center; 
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
+        }
+        .btn-submit { 
+            background-color: #8fae87; 
+            color: white; 
+            font-weight: bold; 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 30px; 
+            transition: all 0.3s ease; 
+            letter-spacing: 1px;
+        }
+        .btn-submit:hover { 
+            background-color: #76946f; 
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(118, 148, 111, 0.3);
+        }
+        .form-control, .form-select { 
+            border-radius: 30px; 
+            padding: 11px 20px; 
+            border: 1px solid #c2d1c2; 
+            background-color: #fafdFA;
+            color: #4a574a;
+        }
+        .form-control:focus, .form-select:focus { 
+            box-shadow: 0 0 0 4px rgba(143, 174, 135, 0.25); 
+            border-color: #8fae87; 
+            background-color: #fff;
+        }
+        .switch-link { 
+            text-align: center; 
+            margin-top: 25px; 
+            font-size: 0.9rem; 
+        }
+        .switch-link a { 
+            color: #6e8c68; 
+            text-decoration: none; 
+            font-weight: 600; 
+        }
+        .switch-link a:hover { 
+            text-decoration: underline; 
+        }
+    </style>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+</head>
+<body>
+
+<div class="auth-card">
+    <div class="brand-title">Реєстрація акаунту</div>
+    
+    <div th:if="${error}" class="alert alert-danger p-2 text-center small" th:text="${error}" style="border-radius: 30px; background-color: #fbf2f2; color: #a84343; border: 1px solid #f2dadb;"></div>
+
+    <form action="/register" method="post">
+        
+        <div class="row g-2 mb-3">
+            <div class="col-md-6">
+                <label class="form-label text-secondary small fw-bold px-2">Прізвище</label>
+                <input type="text" name="lastName" class="form-control" placeholder="Прізвище" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-secondary small fw-bold px-2">Ім'я</label>
+                <input type="text" name="firstName" class="form-control" placeholder="Ім'я" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold px-2">Електронна пошта</label>
+            <input type="email" name="email" class="form-control" placeholder="example@domain.com" required>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold px-2">Придумайте пароль</label>
+            <input type="password" name="password" class="form-control" placeholder="Мінімум 4 символи" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-secondary small fw-bold px-2">Хто ви у системі?</label>
+            <select name="role" class="form-select" required>
+                <option value="STUDENT">Я студент/учень</option>
+                <option value="TEACHER">Я викладач </option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-submit shadow-sm">ЗАРЕЄСТРУВАТИСЯ</button>
+    </form>
+
+    <div class="switch-link">
+        Вже є профіль? <a href="/login">Увійти в кабінет</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат тестування</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); min-height: 100vh; display: flex; flex-direction: column; margin: 0; }
+        
+        .result-card { 
+            background: white; 
+            border-radius: 25px; 
+            box-shadow: 0 15px 40px rgba(45, 106, 79, 0.15); 
+            padding: 50px 40px; 
+            border-top: 8px solid #8fae87;
+            position: relative;
+            overflow: hidden;
+        }
+        .result-card::after {
+            content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px;
+            background: rgba(143, 174, 135, 0.1); border-radius: 50%;
+        }
+
+        .percent-box { 
+            font-size: 5rem; 
+            font-weight: 800; 
+            line-height: 1; 
+            background: linear-gradient(135deg, #2d6a4f, #52b788);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .percent-box.fail {
+            background: linear-gradient(135deg, #d00000, #e63946);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .progress { height: 12px; border-radius: 20px; background: #e9ecef; }
+        .progress-bar-animated { animation: progress-bar-stripes 1s linear infinite; }
+
+        .stat-item { 
+            background: #f8f9fa; 
+            border-radius: 15px; 
+            padding: 15px; 
+            text-align: center; 
+            transition: transform 0.2s;
+        }
+        .stat-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        
+        .site-footer { background-color: #262626; color: #a8a8a8; padding: 40px 0 20px; margin-top: auto; font-size: 0.9rem; }
+        .site-footer h6 { color: white; font-weight: bold; margin-bottom: 20px; }
+        .site-footer a { color: #8fae87; text-decoration: none; transition: color 0.3s; }
+        .site-footer a:hover { color: #52b788; }
+        .footer-social a { display: inline-flex; align-items: center; justify-content: center; width: 35px; height: 35px; background: #333; border-radius: 50%; color: white; margin-right: 8px; transition: background 0.3s; }
+        .footer-social a:hover { background: #52b788; }
+        .footer-bottom { border-top: 1px solid #333; padding-top: 15px; margin-top: 30px; text-align: center; }
+    </style>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div class="container mt-5 mb-5 flex-grow-1">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            
+            <div class="result-card text-center" data-aos="zoom-in" data-aos-duration="800">
+                
+                <!-- Іконка успіху/невдачі -->
+                <div th:if="${percentage >= 60}" class="mb-4">
+                    <i class="fas fa-trophy fa-3x text-warning"></i>
+                </div>
+                <div th:if="${percentage < 60}" class="mb-4">
+                    <i class="fas fa-times-circle fa-3x text-danger"></i>
+                </div>
+
+                <h2 class="fw-bold mb-2" th:classappend="${percentage >= 60} ? 'text-success' : 'text-danger'">
+                    <span th:if="${percentage >= 60}">Тест успішно пройдено!</span>
+                    <span th:if="${percentage < 60}">Тест не пройдено</span>
+                </h2>
+                <h5 class="text-muted mb-4" th:text="${testTitle}">Назва тесту</h5>
+                
+                <hr class="my-4">
+                
+                <!-- Відсоток та Прогрес-бар -->
+                <div class="my-5">
+                    <div class="percent-box mb-3" th:classappend="${percentage < 60} ? 'fail'">
+                        <span th:text="${percentage}"></span>%
+                    </div>
+                    <div class="progress shadow-sm">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" 
+                             th:style="'width: ' + ${percentage} + '%'" 
+                             th:classappend="${percentage >= 60} ? 'bg-success' : 'bg-danger'"
+                             aria-valuenow="percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <!-- Блок статистики -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="stat-item">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h6 class="text-muted mb-1">Правильних відповідей</h6>
+                            <h4 class="fw-bold mb-0" th:text="|${correctCount} з ${totalQuestions}|">0 з 0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="stat-item">
+                            <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                            <h6 class="text-muted mb-1">Набрано балів</h6>
+                            <h4 class="fw-bold mb-0 text-primary" th:text="|${studentPoints} / ${maxPoints}|">0 / 0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Повідомлення -->
+                <div class="alert shadow-sm mt-4" th:classappend="${percentage >= 60} ? 'alert-success' : 'alert-danger'">
+                    <span th:if="${percentage >= 60}"><i class="fas fa-lightbulb me-2"></i>Залік складено! Чудовий рівень підготовки.</span>
+                    <span th:if="${percentage < 60}"><i class="fas fa-exclamation-triangle me-2"></i>Результат незадовільний. Спробуйте ще раз.</span>
+                </div>
+
+                <!-- Кнопка -->
+                <div class="mt-4" data-aos="fade-up" data-aos-delay="400">
+                    <a href="/" class="btn btn-success btn-lg px-5 py-3 fw-bold shadow"><i class="fas fa-home me-2"></i>Повернутись на головну</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ФУТЕР -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h6><i class="fas fa-leaf text-success me-2"></i>Знань Простір</h6>
+                <p class="text-justify" style="font-size: 0.85rem;">Сучасна платформа для створення тестів, перевірки знань та проведення інтерактивних опитувань у реальному часі.</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h6><i class="fas fa-address-book text-success me-2"></i>Контакти</h6>
+                <ul class="list-unstyled" style="font-size: 0.85rem;">
+                    <li class="mb-2"><i class="fas fa-phone me-2 text-success"></i> +380 (99) 123-45-67</li>
+                    <li class="mb-2"><i class="fas fa-envelope me-2 text-success"></i> support@znanyaprostir.ua</li>
+                    <li><i class="fas fa-map-marker-alt me-2 text-success"></i> м. Київ, вул. Академічна, 1</li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h6><i class="fas fa-share-alt text-success me-2"></i>Ми в мережі</h6>
+                <div class="footer-social">
+                    <a href="#" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" title="Viber"><i class="fab fa-viber"></i></a>
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 Знань Простір. Всі права захищені.
+        </div>
+    </div>
+</footer>
+
+<!-- Скрипти -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 800, once: true });
+</script>
+</body>
+</html>

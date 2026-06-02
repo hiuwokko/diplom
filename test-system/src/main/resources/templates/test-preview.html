@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Перегляд тесту</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(180deg, #d3e0d7 0%, #e2ebd5 60%, #a3c29b 100%) no-repeat center center fixed; background-size: cover; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .preview-card { background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(74, 87, 74, 0.1); padding: 30px; margin-bottom: 30px; }
+        .question-box { background: #f8f9fa; border-left: 5px solid #8fae87; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .options-list { list-style-type: none; padding-left: 0; }
+        .options-list li { padding: 8px 15px; margin-bottom: 5px; background: white; border: 1px solid #dee2e6; border-radius: 8px; }
+        .btn-conduct { background-color: #ff9800; color: white; border-radius: 30px; padding: 15px 40px; font-size: 1.3rem; font-weight: bold; border: none; }
+        .btn-conduct:hover { background-color: #e68a00; }
+    </style>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+</head>
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div class="container mt-5 mb-5">
+    <div class="preview-card text-center">
+        <h2 th:text="${test.title}">Назва тесту</h2>
+        <p class="text-muted">Кількість питань: <span th:text="${#lists.size(test.questions)}"></span> | Час: <span th:text="${test.timeLimit}"></span> хв</p>
+        
+        <hr>
+
+        <h4 class="text-success mb-3">Попередній перегляд (як побачать учні)</h4>
+    </div>
+
+  
+    <div th:each="q, iterStat : ${test.questions}" class="preview-card">
+        <div class="question-box">
+            <h5 class="fw-bold">
+                Запитання <span th:text="${iterStat.count}"></span>
+            </h5>
+            <p class="mb-3 fs-5" th:text="${q.questionText}">Текст питання</p>
+            
+            <ul class="options-list">
+                <li th:if="${q.optionA != null and !q.optionA.isEmpty()}">
+                    <span class="fw-bold me-2">А)</span> <span th:text="${q.optionA}"></span>
+                </li>
+                <li th:if="${q.optionB != null and !q.optionB.isEmpty()}">
+                    <span class="fw-bold me-2">B)</span> <span th:text="${q.optionB}"></span>
+                </li>
+                <li th:if="${q.optionC != null and !q.optionC.isEmpty()}">
+                    <span class="fw-bold me-2">C)</span> <span th:text="${q.optionC}"></span>
+                </li>
+                <li th:if="${q.optionD != null and !q.optionD.isEmpty()}">
+                    <span class="fw-bold me-2">D)</span> <span th:text="${q.optionD}"></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+   
+    <div class="text-center mt-4">
+        <form th:action="@{/test/conduct/{id}(id=${test.id})}" method="post">
+            <button type="submit" class="btn btn-conduct shadow-lg">🚀 ПРОВЕСТИ ТЕСТ (ЗГЕНЕРУВАТИ КОД)</button>
+        </form>
+        <p class="text-muted small mt-2">Буде створено нову сесію тесту з унікальним кодом для учнів.</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

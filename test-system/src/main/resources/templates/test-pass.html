@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Проходження тесту</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body { background: linear-gradient(180deg, #d3e0d7 0%, #e2ebd5 60%, #a3c29b 100%) no-repeat center center fixed; background-size: cover; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; margin: 0; user-select: none; }
+        .top-progress-bar { background-color: #55704f; color: white; padding: 14px 30px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-container { flex: 1; display: flex; flex-direction: column; padding: 30px; max-width: 1000px; width: 100%; margin: 0 auto; }
+        .question-card { background: rgba(255, 255, 255, 0.9); border-radius: 20px; box-shadow: 0 8px 32px rgba(74, 87, 74, 0.1); padding: 40px; margin-bottom: 30px; text-align: center; }
+        .question-text { font-size: 1.8rem; color: #4a574a; font-weight: 600; margin-bottom: 20px; }
+        .answers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .option-btn { background: white; border: 2px solid #a3c29b; border-radius: 15px; padding: 20px; font-size: 1.2rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .option-btn:hover { background: #e8f0e6; transform: translateY(-3px); }
+        .option-btn.selected { background: #8fae87; color: white; border-color: #76946f; transform: translateY(-3px); }
+        .btn-next { background-color: #55704f; color: white; border-radius: 30px; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border: none; margin-top: 30px; align-self: center; cursor: pointer; }
+        .btn-next:hover { background-color: #4a574a; }
+        .time-warning { color: #ff4d4d; font-weight: bold; }
+        .question-image { max-height: 250px; border-radius: 15px; margin-bottom: 20px; object-fit: contain; }
+    </style>
+</head>
+<body>
+
+<div class="top-progress-bar">
+    <div id="questionCounter">Завантаження...</div>
+    <div id="timerDisplay">⏱ ...</div>
+</div>
+
+<div class="test-container">
+    <div class="question-card">
+        <div id="mediaArea" style="display: none; text-align: center; margin-bottom: 20px;">
+            <img id="questionImage" src="" alt="Зображення" class="question-image">
+        </div>
+        <div id="questionTextField" class="question-text">Завантаження запитання...</div>
+    </div>
+
+    <div class="answers-grid" id="answersGrid">
+        <div class="option-btn" onclick="toggleAnswer('A')" id="btnA">Варіант А</div>
+        <div class="option-btn" onclick="toggleAnswer('B')" id="btnB">Варіант B</div>
+        <div class="option-btn" onclick="toggleAnswer('C')" id="btnC">Варіант C</div>
+        <div class="option-btn" onclick="toggleAnswer('D')" id="btnD">Варіант D</div>
+    </div>
+
+    <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Наступне питання ➔</button>
+</div>
+
+<form id="submitForm" th:action="@{/test/{id}/submit(id=${test.id})}" method="post" style="display: none;"></form>
+
+<script th:inline="javascript">
+    const testId = /*[[${test.id}]]*/ 0;
+    const timeLimitMinutes = /*[[${test.timeLimit}]]*/ 10; 
+    
+    let questions = [];
+    let currentIndex = 0;
+    let selectedAnswers = {};
+    let currentSelections = new Set();
+    let timeLeft = (timeLimitMinutes != null ? timeLimitMinutes : 10) * 60; 
+    let timerInterval;
+
+    function startTimer() {
+        if (timeLimitMinutes == null || timeLimitMinutes <= 0) {
+            document.getElementById('timerDisplay').innerText = "⏱ Без обмежень часу";
+            return;
+        }
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            
+            let display = `⏱ ${mins}:${secs < 10 ? '0' + secs : secs}`;
+            let timerEl = document.getElementById('timerDisplay');
+            timerEl.innerText = display;
+            
+            if (timeLeft <= 60) {
+                timerEl.classList.add('time-warning');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Час вийшов! Тест буде автоматично завершено.");
+                sendResultsToBackend();
+            }
+        }, 1000);
+    }
+
+    async function loadTestQuestions() {
+        try {
+            const response = await fetch(`/api/tests/${testId}/questions`);
+            if (!response.ok) throw new Error('Помилка: ' + response.status);
+            
+            questions = await response.json();
+            
+            if (questions.length > 0) { 
+                renderCurrentQuestion(); 
+                startTimer(); 
+            } else { 
+                document.getElementById('questionTextField').innerText = "У цьому тесті немає питань."; 
+                document.getElementById('nextBtn').style.display = 'none'; 
+            }
+        } catch (e) { 
+            console.error("ПОМИЛКА ЗАВАНТАЖЕННЯ:", e);
+            document.getElementById('questionTextField').innerText = "Помилка завантаження питань."; 
+        }
+    }
+
+    function renderCurrentQuestion() {
+        const q = questions[currentIndex];
+        document.getElementById('questionCounter').innerText = `Питання ${currentIndex + 1} з ${questions.length}`;
+        document.getElementById('questionTextField').innerText = q.questionText; 
+
+        const mediaArea = document.getElementById('mediaArea');
+        const questionImage = document.getElementById('questionImage');
+        if (q.imageUrl && q.imageUrl.trim() !== '') {
+            questionImage.src = q.imageUrl;
+            mediaArea.style.display = 'block';
+        } else {
+            mediaArea.style.display = 'none';
+        }
+
+        const options = ['A', 'B', 'C', 'D'];
+        options.forEach(letter => {
+            const btn = document.getElementById('btn' + letter);
+            const optionText = q['option' + letter]; 
+            if (optionText && optionText.trim() !== "") { 
+                btn.style.display = 'block'; 
+                btn.innerText = optionText; 
+            } else { 
+                btn.style.display = 'none'; 
+            }
+        });
+
+        currentSelections.clear();
+        updateButtonStyles();
+
+        const nextBtn = document.getElementById('nextBtn');
+        nextBtn.innerText = (currentIndex === questions.length - 1) ? 'Завершити тест ✅' : 'Наступне питання ➔';
+    }
+
+    function toggleAnswer(letter) {
+        if (currentSelections.has(letter)) { currentSelections.delete(letter); } 
+        else { currentSelections.add(letter); }
+        updateButtonStyles();
+    }
+
+    function updateButtonStyles() {
+        ['A', 'B', 'C', 'D'].forEach(l => {
+            const btn = document.getElementById('btn' + l);
+            if (currentSelections.has(l)) { btn.classList.add('selected'); } 
+            else { btn.classList.remove('selected'); }
+        });
+    }
+
+    function nextQuestion() {
+        if (currentSelections.size === 0) { alert("Оберіть хоча б одну відповідь!"); return; }
+        const ans = Array.from(currentSelections).sort().join(',');
+        selectedAnswers[questions[currentIndex].id] = ans;
+        if (currentIndex < questions.length - 1) { currentIndex++; renderCurrentQuestion(); } 
+        else { sendResultsToBackend(); }
+    }
+
+    function sendResultsToBackend() {
+        clearInterval(timerInterval);
+        const form = document.getElementById('submitForm');
+        for (const [qId, ans] of Object.entries(selectedAnswers)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `question_${qId}`;
+            input.value = ans;
+            form.appendChild(input);
+        }
+        form.submit();
+    }
+
+    window.onload = loadTestQuestions;
+</script>
+</body>
+</html>
