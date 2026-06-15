@@ -70,7 +70,6 @@
             
             <div class="result-card text-center" data-aos="zoom-in" data-aos-duration="800">
                 
-                <!-- Іконка успіху/невдачі -->
                 <div th:if="${percentage >= 60}" class="mb-4">
                     <i class="fas fa-trophy fa-3x text-warning"></i>
                 </div>
@@ -86,7 +85,6 @@
                 
                 <hr class="my-4">
                 
-                <!-- Відсоток та Прогрес-бар -->
                 <div class="my-5">
                     <div class="percent-box mb-3" th:classappend="${percentage < 60} ? 'fail'">
                         <span th:text="${percentage}"></span>%
@@ -100,7 +98,6 @@
                     </div>
                 </div>
 
-                <!-- Блок статистики -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="stat-item">
@@ -118,13 +115,11 @@
                     </div>
                 </div>
 
-                <!-- Повідомлення -->
                 <div class="alert shadow-sm mt-4" th:classappend="${percentage >= 60} ? 'alert-success' : 'alert-danger'">
                     <span th:if="${percentage >= 60}"><i class="fas fa-lightbulb me-2"></i>Залік складено! Чудовий рівень підготовки.</span>
                     <span th:if="${percentage < 60}"><i class="fas fa-exclamation-triangle me-2"></i>Результат незадовільний. Спробуйте ще раз.</span>
                 </div>
 
-                <!-- Кнопка -->
                 <div class="mt-4" data-aos="fade-up" data-aos-delay="400">
                     <a href="/" class="btn btn-success btn-lg px-5 py-3 fw-bold shadow"><i class="fas fa-home me-2"></i>Повернутись на головну</a>
                 </div>
@@ -134,7 +129,7 @@
     </div>
 </div>
 
-<!-- ФУТЕР -->
+
 <footer class="site-footer">
     <div class="container">
         <div class="row">
@@ -166,7 +161,6 @@
     </div>
 </footer>
 
-<!-- Скрипти -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>

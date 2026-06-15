@@ -12,9 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class MainController {
@@ -90,15 +92,19 @@ public class MainController {
         if (userEmail == null) return REDIRECT_LOGIN;
         
         TestEntity test = new TestEntity();
-        test.setTitle(title); test.setDescription(description); test.setCategory(category);
-        test.setTimeLimit(timeLimit); test.setTargetAudience(targetAudience);
+        test.setTitle(title); 
+        test.setDescription(description); 
+        test.setCategory(category);
+
+        test.setTimeLimit((timeLimit != null && timeLimit > 0) ? timeLimit : null);
+        
+        test.setTargetAudience(targetAudience);
         test.setTestCode(UUID.randomUUID().toString().substring(0, 8));
         test.setAuthorEmail(userEmail); 
         test.setPublished("on".equals(published));
         test.setHideAnswers("on".equals(hideAnswers)); 
         testRepository.save(test);
 
-        
         Map<String, MultipartFile> fileMap = ((MultipartHttpServletRequest) request).getFileMap();
         
         int questionIndex = 0;
@@ -117,7 +123,21 @@ public class MainController {
             question.setOptionC(request.getParameter("optionC_" + questionIndex));
             question.setOptionD(request.getParameter("optionD_" + questionIndex));
 
-          
+            String[] correctAnswersArray = request.getParameterValues("correctAnswers_" + questionIndex);
+            String correctAnswerStr = "";
+            
+            if (correctAnswersArray != null && correctAnswersArray.length > 0) {
+                String rawAnswer = String.join(",", correctAnswersArray);
+                
+                correctAnswerStr = Arrays.stream(rawAnswer.toUpperCase().split(","))
+                                         .map(String::trim)
+                                         .filter(s -> !s.isEmpty())
+                                         .sorted()
+                                         .collect(Collectors.joining(","));
+            }
+            question.setCorrectAnswer(correctAnswerStr);
+            // ==================================================
+
             try {
                 MultipartFile imageFile = fileMap.get("imageFile_" + questionIndex);
                 if (imageFile != null && !imageFile.isEmpty()) {
@@ -232,17 +252,26 @@ public class MainController {
         int studentPoints = 0;
         int maxPoints = 0;
 
+
         for (QuestionEntity q : questions) {
             maxPoints += q.getPoints(); 
             String studentAnswer = request.getParameter("question_" + q.getId());
             String correctAnswer = q.getCorrectAnswer();
-            if (studentAnswer != null && correctAnswer != null) {
-                if (studentAnswer.replaceAll("\\s+", "").equalsIgnoreCase(correctAnswer.replaceAll("\\s+", ""))) {
+            
+            if (studentAnswer != null && correctAnswer != null && !correctAnswer.isEmpty()) {
+                String normalizedStudentAnswer = Arrays.stream(studentAnswer.toUpperCase().split(","))
+                                                        .map(String::trim)
+                                                        .filter(s -> !s.isEmpty())
+                                                        .sorted()
+                                                        .collect(Collectors.joining(","));
+                                                        
+                if (normalizedStudentAnswer.equals(correctAnswer)) {
                     correctCount++;
                     studentPoints += q.getPoints();
                 }
             }
         }
+
 
         double percentage = (maxPoints > 0) ? Math.round(((double) studentPoints / maxPoints) * 100.0) : 0;
 

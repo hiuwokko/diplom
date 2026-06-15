@@ -12,7 +12,6 @@ public class ServerConfig {
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> containerCustomizer() {
         return factory -> factory.addConnectorCustomizers((Connector connector) -> {
-            // 500 МБ у байтах
             connector.setMaxPostSize(524288000);
             connector.setProperty("maxSwallowSize", "524288000");
             connector.setMaxParameterCount(50000);

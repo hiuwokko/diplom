@@ -54,18 +54,21 @@
 
 <script th:inline="javascript">
     const testId = /*[[${test.id}]]*/ 0;
-    const timeLimitMinutes = /*[[${test.timeLimit}]]*/ 10; 
+    const timeLimitMinutes = /*[[${test.timeLimit}]]*/ null; 
     
     let questions = [];
     let currentIndex = 0;
     let selectedAnswers = {};
     let currentSelections = new Set();
-    let timeLeft = (timeLimitMinutes != null ? timeLimitMinutes : 10) * 60; 
+    
+
+    let timeLeft = (timeLimitMinutes != null && timeLimitMinutes > 0) ? timeLimitMinutes * 60 : -1; 
     let timerInterval;
 
     function startTimer() {
-        if (timeLimitMinutes == null || timeLimitMinutes <= 0) {
-            document.getElementById('timerDisplay').innerText = "⏱ Без обмежень часу";
+
+        if (timeLeft === -1) {
+            document.getElementById('timerDisplay').innerText = "♾️ Без обмежень";
             return;
         }
         

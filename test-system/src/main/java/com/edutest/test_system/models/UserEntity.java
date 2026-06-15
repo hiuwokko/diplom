@@ -25,7 +25,6 @@ public class UserEntity {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    // НОВІ ПОЛЯ
     @Column(name = "avatar_url")
     private String avatarUrl;
 

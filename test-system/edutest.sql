@@ -1,13 +1,11 @@
 DROP DATABASE IF EXISTS edutest;
 CREATE DATABASE edutest;
 
--- 2. ОБОВ'ЯЗКОВО вказуємо, що працюватимемо саме в ній
 USE edutest;
 
 DELETE FROM questions WHERE test_id IN (SELECT id FROM tests WHERE title LIKE '%(Сесія)%');
 DELETE FROM tests WHERE title LIKE '%(Сесія)%';
 
--- 3. Створюємо таблицю користувачів
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -17,7 +15,6 @@ CREATE TABLE users (
     last_name VARCHAR(255) NOT NULL
 );
 
--- 4. Створюємо таблицю тестів
 CREATE TABLE tests (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -33,7 +30,6 @@ CREATE TABLE tests (
     published BOOLEAN DEFAULT FALSE
 );
 
--- 5. Створюємо таблицю питань
 CREATE TABLE questions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     test_id BIGINT NOT NULL,
@@ -49,7 +45,7 @@ CREATE TABLE questions (
     CONSTRAINT fk_question_test FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
 );
 
--- 6. Створюємо таблицю результатів
+
 CREATE TABLE results (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     student_id BIGINT,

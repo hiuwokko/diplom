@@ -38,7 +38,6 @@ public class ResultEntity {
     public double getPercentage() { return percentage; }
     public void setPercentage(double percentage) { this.percentage = percentage; }
 
-    // НОВІ ГЕТЕРИ ТА СЕТЕРИ
     public String getStudentFirstName() { return studentFirstName; }
     public void setStudentFirstName(String studentFirstName) { this.studentFirstName = studentFirstName; }
     public String getStudentLastName() { return studentLastName; }

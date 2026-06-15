@@ -20,7 +20,7 @@
         .audience-badge { cursor: pointer; border: 1px solid #cbdcc7; background: white; padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; transition: all 0.2s; }
         .audience-radio:checked + .audience-badge { background: #8fae87; color: white; border-color: #8fae87; }
     </style>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
 </head>
 <body>
 <div class="container mt-5 mb-5">
@@ -35,10 +35,6 @@
                     <input type="text" name="title" class="form-control form-style fs-2 fw-bold mb-4" placeholder="Назва вашого тесту..." required>
                     
                     <div class="settings-card">
-                        <div class="form-check form-switch mb-2">
-                            <input class="form-check-input" type="checkbox" name="hideAnswers" id="hideAnswersSwitch">
-                            <label class="form-check-label fw-bold text-success" for="hideAnswersSwitch">🔒 Приховати правильні відповіді від учнів</label>
-                        </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" name="published" id="publishedSwitch" checked>
                             <label class="form-check-label fw-bold text-primary" for="publishedSwitch">🌐 Опублікувати тест (доступний всім)</label>
@@ -73,7 +69,12 @@
                             <div class="d-flex align-items-center bg-white p-2 rounded-pill px-3" style="border: 1px solid #cbdcc7;">
                                 <span class="me-2">⏱</span>
                                 <label class="fw-bold text-secondary small me-2 mb-0" style="white-space: nowrap;">Час (хв):</label>
-                                <input type="number" name="timeLimit" class="form-control border-0 fw-bold p-0" value="10" min="1" max="180" required style="color: #8fae87;">
+                                <input type="number" name="timeLimit" id="timeLimitInput" class="form-control border-0 fw-bold p-0" value="10" min="1" max="180" required style="color: #8fae87; width: 50px;">
+                            </div>
+                            <!-- НОВЕ: Перемикач без обмежень часу -->
+                            <div class="form-check form-switch mt-2 ms-2">
+                                <input class="form-check-input" type="checkbox" id="noTimeLimitSwitch" onchange="toggleTimeLimit()" style="cursor: pointer;">
+                                <label class="form-check-label small text-muted" for="noTimeLimitSwitch" style="cursor: pointer;">♾️ Без обмежень часу</label>
                             </div>
                         </div>
 
@@ -133,6 +134,21 @@
         const customInput = document.getElementById('customCategoryInput');
         const finalCategory = document.getElementById('finalCategory');
         finalCategory.value = (select.value === 'Інше') ? customInput.value.trim() : select.value;
+    }
+
+    // НОВА ФУНКЦІЯ: Вимкнення поля часу
+    function toggleTimeLimit() {
+        const switchEl = document.getElementById('noTimeLimitSwitch');
+        const inputEl = document.getElementById('timeLimitInput');
+        if (switchEl.checked) {
+            inputEl.value = '';
+            inputEl.disabled = true;
+            inputEl.required = false;
+        } else {
+            inputEl.value = '10';
+            inputEl.disabled = false;
+            inputEl.required = true;
+        }
     }
 
     function addQuestionField() {
