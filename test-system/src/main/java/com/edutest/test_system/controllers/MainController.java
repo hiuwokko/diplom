@@ -5,6 +5,7 @@ import com.edutest.test_system.repositories.*;
 import com.edutest.test_system.util.FileUploadUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Value; // Додано імпорт
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,10 @@ public class MainController {
     private final ResultRepository resultRepository; 
     private final QuestionRepository questionRepository; 
     private final UserRepository userRepository; 
+
+   
+    @Value("${APP_BASE_URL:http://localhost:8081}")
+    private String appBaseUrl;
 
     public MainController(TestRepository testRepository, ResultRepository resultRepository, 
                           QuestionRepository questionRepository, UserRepository userRepository) {
@@ -65,6 +70,7 @@ public class MainController {
         if (testCode != null && !testCode.trim().isEmpty()) {
             TestEntity test = testRepository.findByTestCode(testCode.trim());
             if (test != null && !"CLOSED".equals(test.getStatus())) {
+                // ВИПРАВЛЕННЯ: redirect:/... працює автоматично правильно
                 return "redirect:/test/lobby/" + test.getId();
             }
         }
@@ -136,7 +142,6 @@ public class MainController {
                                          .collect(Collectors.joining(","));
             }
             question.setCorrectAnswer(correctAnswerStr);
-            // ==================================================
 
             try {
                 MultipartFile imageFile = fileMap.get("imageFile_" + questionIndex);
@@ -192,6 +197,10 @@ public class MainController {
         }
         
         model.addAttribute("test", test);
+        
+        // ПРИКЛАД: Якщо вам потрібно передати повне посилання в HTML:
+        // model.addAttribute("fullLink", appBaseUrl + "/test/lobby/" + id);
+        
         return "test-lobby";
     }
 
@@ -272,7 +281,6 @@ public class MainController {
             }
         }
 
-
         double percentage = (maxPoints > 0) ? Math.round(((double) studentPoints / maxPoints) * 100.0) : 0;
 
         String firstName = (String) session.getAttribute("studentFirstName");
@@ -329,6 +337,10 @@ public class MainController {
         
         model.addAttribute("test", test);
         model.addAttribute("results", results);
+        
+        // ПРИКЛАД Використання appBaseUrl для генерації повного посилання
+        // model.addAttribute("lobbyLink", appBaseUrl + "/test/lobby/" + id);
+        
         return "teacher-results";
     }
 
