@@ -5,7 +5,7 @@ import com.edutest.test_system.repositories.*;
 import com.edutest.test_system.util.FileUploadUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Value; // Додано імпорт
+import org.springframework.beans.factory.annotation.Value; // <--- ДОДАНО
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class MainController {
     private final QuestionRepository questionRepository; 
     private final UserRepository userRepository; 
 
-   
+    // <--- ДОДАНО: Беремо базову URL з налаштувань (Render або Localhost)
     @Value("${APP_BASE_URL:http://localhost:8081}")
     private String appBaseUrl;
 
@@ -70,7 +70,6 @@ public class MainController {
         if (testCode != null && !testCode.trim().isEmpty()) {
             TestEntity test = testRepository.findByTestCode(testCode.trim());
             if (test != null && !"CLOSED".equals(test.getStatus())) {
-                // ВИПРАВЛЕННЯ: redirect:/... працює автоматично правильно
                 return "redirect:/test/lobby/" + test.getId();
             }
         }
@@ -101,9 +100,7 @@ public class MainController {
         test.setTitle(title); 
         test.setDescription(description); 
         test.setCategory(category);
-
         test.setTimeLimit((timeLimit != null && timeLimit > 0) ? timeLimit : null);
-        
         test.setTargetAudience(targetAudience);
         test.setTestCode(UUID.randomUUID().toString().substring(0, 8));
         test.setAuthorEmail(userEmail); 
@@ -134,7 +131,6 @@ public class MainController {
             
             if (correctAnswersArray != null && correctAnswersArray.length > 0) {
                 String rawAnswer = String.join(",", correctAnswersArray);
-                
                 correctAnswerStr = Arrays.stream(rawAnswer.toUpperCase().split(","))
                                          .map(String::trim)
                                          .filter(s -> !s.isEmpty())
@@ -195,12 +191,7 @@ public class MainController {
             model.addAttribute("prefilledFirstName", "");
             model.addAttribute("prefilledLastName", "");
         }
-        
         model.addAttribute("test", test);
-        
-        // ПРИКЛАД: Якщо вам потрібно передати повне посилання в HTML:
-        // model.addAttribute("fullLink", appBaseUrl + "/test/lobby/" + id);
-        
         return "test-lobby";
     }
 
@@ -224,7 +215,6 @@ public class MainController {
             resultRepository.save(lobbyResult);
             return "redirect:/test/waiting/" + id; 
         }
-        
         return "redirect:/test/pass/" + id;
     }
 
@@ -260,7 +250,6 @@ public class MainController {
         int correctCount = 0;
         int studentPoints = 0;
         int maxPoints = 0;
-
 
         for (QuestionEntity q : questions) {
             maxPoints += q.getPoints(); 
@@ -338,8 +327,9 @@ public class MainController {
         model.addAttribute("test", test);
         model.addAttribute("results", results);
         
-        // ПРИКЛАД Використання appBaseUrl для генерації повного посилання
-        // model.addAttribute("lobbyLink", appBaseUrl + "/test/lobby/" + id);
+        // <--- ВИПРАВЛЕННЯ: Генеруємо повне посилання і передаємо в HTML
+        String fullLink = appBaseUrl + "/test/lobby/" + test.getId();
+        model.addAttribute("fullLink", fullLink);
         
         return "teacher-results";
     }
@@ -348,7 +338,6 @@ public class MainController {
     public String previewTest(@PathVariable Long id, Model model, HttpSession session) {
         TestEntity test = testRepository.findById(id).orElse(null);
         if (test == null) return REDIRECT_INDEX;
-        
         model.addAttribute("test", test);
         return "test-preview";
     }
@@ -438,7 +427,6 @@ public class MainController {
     public String showAccountPage(HttpSession session, Model model) {
         String email = (String) session.getAttribute("userEmail");
         if (email == null) return REDIRECT_LOGIN;
-        
         UserEntity user = userRepository.findByEmail(email).orElse(null);
         model.addAttribute("accountUser", user);
         return "account";

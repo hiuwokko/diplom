@@ -12,7 +12,7 @@
         .link-box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px dashed #8fae87; }
         .chart-container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
     </style>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍃</text></svg>">
 </head>
 <body>
 
@@ -39,7 +39,8 @@
         <div class="link-box mb-4" th:if="${test.status != 'CLOSED'}">
             <h5>🔗 Посилання для учнів:</h5>
             <div class="input-group">
-                <input type="text" class="form-control" id="testLink" readonly th:value="'http://localhost:8081/test/lobby/' + ${test.id}">
+                <!-- ВИПРАВЛЕННЯ: Беремо посилання з контролера -->
+                <input type="text" class="form-control" id="testLink" readonly th:value="${fullLink}">
                 <button class="btn btn-primary" onclick="copyLink()"><i class="fas fa-copy me-1"></i> Копіювати</button>
             </div>
             <p class="mt-2 mb-0">Код: <b class="text-success fs-4" th:text="${test.testCode}"></b></p>
@@ -82,15 +83,14 @@
 
     const testId = /*[[${test.id}]]*/ 0;
     const testStatus = /*[[${test.status}]]*/ 'ACTIVE';
-    
-   
     const initialResults = /*[[${results}]]*/ [];
 
     function copyLink() {
         const copyText = document.getElementById("testLink");
         copyText.select();
-        document.execCommand("copy");
-        alert("Посилання скопійовано!");
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+        navigator.clipboard.writeText(copyText.value);
+        alert("Посилання скопійовано: " + copyText.value);
     }
 
     
@@ -155,7 +155,6 @@
         });
     }
 
-  
     renderChart(initialResults);
 </script>
 
